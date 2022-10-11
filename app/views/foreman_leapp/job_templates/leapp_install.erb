@@ -1,0 +1,36 @@
+<%#
+kind: job_template
+name: Install Leaoo
+job_category: Leapp - Install
+description_format: 'Install leapp package'
+provider_type: Ansible
+feature: leapp_upgrade
+model: JobTemplate
+%>
+<%
+  is_rhel = @host.operatingsystem.name == 'RedHat'
+  os_major = @host.operatingsystem.major.to_i
+-%>
+---
+- hosts: all
+  tasks:
+<% if is_rhel &&  os_major == 7 -%>
+    - name: Enable rhel-7-server-rpms
+      command: subscription-manager repos --enable rhel-7-server-rpms
+    - name: Enable rhel-7-server-extras-rpms repo
+      command: subscription-manager repos --enable rhel-7-server-extras-rpms
+    - name: Install leapp
+      yum:
+        name: leapp
+        state: present
+<% end -%>
+<% if is_rhel && os_major == 8 -%>
+    - name: Enable rhel-8-for-x86_64-baseos-rpms
+      command: subscription-manager repos --enable rhel-8-for-x86_64-baseos-rpms
+    - name: Enable rhel-8-for-x86_64-appstream-rpms
+      command: subscription-manager repos --enable rhel-8-for-x86_64-appstream-rpms
+    - name: Install leapp-upgrade
+      dnf:
+        name: leapp-upgrade
+        state: present
+<% end -%>
